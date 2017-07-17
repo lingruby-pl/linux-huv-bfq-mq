@@ -68,7 +68,7 @@ pkgbase=linux-huv-bfq-mq-git
 # pkgname=('linux-huv-bfq-mq-git-kernel' 'linux-huv-bfq-mq-git-headers' 'linux-huv-bfq-mq-git-docs')
 _srcname=linux-stable
 pkgver=4.12.2.r0.gab35d16f66d6
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="http://algo.ing.unimo.it"
 license=('GPL2')
@@ -87,7 +87,7 @@ source=('git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git#b
         'linux.preset'
 
         ### BFQ-MQ ###
-        "https://raw.githubusercontent.com/sirlucjan/lucjan-kernels/master/lucjan-kernels-experimental/linux-bfq-mq-haswell-git/4.12-bfq-mq-20170710.patch"
+        '4.12-bfq-mq-20170710.patch'
         "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-uuid-block-merge.patch"
 	### UKSM ###
         "http://kerneldedup.org/download/uksm/0.1.2.6/uksm-0.1.2.6-for-v4.12.patch"
@@ -491,7 +491,7 @@ done
 
 sha512sums=('SKIP'
             '77d80d50d8c4323ed36fd2097ba9f6b49bb8d7cae59d32ffa76b309758a7e9f972d26fedd77046d88ce2691bb01a07909f8bdc34ba214414be3bc030ee31994d'
-            '62d796cbc28cf778dbf7cd7075e45040beca842f02d5edd0be44be06503d67962e0e26a4eed51a36b58f5fc8580a8601f69605af59dbbf708fe84cdf3ad58925'
+            'd7ae645699675ea0c60584d647b841e3fe7ae5034ad3c92bb067c2165ee45e43fb3b14e534df96c2a47697242e939ad89f137a299ea841342bc3cbc32f1aa337'
             'd6faa67f3ef40052152254ae43fee031365d0b1524aa0718b659eb75afc21a3f79ea8d62d66ea311a800109bed545bc8f79e8752319cd378eef2cbd3a09aba22'
             '2dc6b0ba8f7dbf19d2446c5c5f1823587de89f4e28e9595937dd51a87755099656f2acec50e3e2546ea633ad1bfd1c722e0c2b91eef1d609103d8abdc0a7cbaf'
             'dc5fcb4103f12f681015873f16fe6235f39889b3ac786f2c9c59a6e708da6c7b3f4982d6d80c299d77d228bb37d5f06836c0f07e77e030e2d747bb9b7a82a466'
