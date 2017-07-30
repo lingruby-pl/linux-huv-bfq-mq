@@ -89,7 +89,7 @@ source=('git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git#b
         ### BFQ-MQ ###
         "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.12-bfq-mq-20170729.patch"
         "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-uuid-block-merge.patch"
-        "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-linux-block-for-linus.patch"
+        "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-linux-block-for-linus_sir_lucjan.patch"
         '0001-Check-presence-on-tree-of-every-entity-after-every-a.patch'
 	### UKSM ###
         "http://kerneldedup.org/download/uksm/0.1.2.6/uksm-0.1.2.6-for-v4.12.patch"
@@ -120,7 +120,7 @@ prepare() {
         msg "Patching source with BFQ-MQ patches"
         patch -Np1 -i "${srcdir}/4.12-bfq-mq-20170729.patch"
         patch -Np1 -i "${srcdir}/4.13-uuid-block-merge.patch"
-        patch -Np1 -i "${srcdir}/4.13-linux-block-for-linus.patch"
+        patch -Np1 -i "${srcdir}/4.13-linux-block-for-linus_sir_lucjan.patch"
 
     ### Patches related to BUG_ON(entity->tree && entity->tree != &st->active) in __bfq_requeue_entity();
         if [ -n "$_use_tentative_patches" ]; then
