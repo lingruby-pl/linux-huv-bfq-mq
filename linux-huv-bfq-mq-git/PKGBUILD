@@ -18,8 +18,8 @@ _makexconfig=
 ### Tweak kernel options prior to a build via gconfig
 _makegconfig=
 
-### Running with a 1000 HZ tick rate 
-_1k_HZ_ticks=y
+### Running with a 100 HZ tick rate 
+_100_HZ_ticks=y
 
 ### Setting GCC Flags for CONFIG_MHASWELL
 _gcc_haswell=y
@@ -67,10 +67,10 @@ _kyber_disable=y
 pkgbase=linux-huv-bfq-mq-git
 # pkgname=('linux-huv-bfq-mq-git-kernel' 'linux-huv-bfq-mq-git-headers' 'linux-huv-bfq-mq-git-docs')
 _srcname=linux-stable
-pkgver=4.12.2.r0.gab35d16f66d6
-pkgrel=2
+pkgver=4.12.4.r0.g13df91dbc06e
+pkgrel=1
 arch=('x86_64')
-url="http://algo.ing.unimo.it"
+url="https://github.com/Algodev-github/bfq-mq/"
 license=('GPL2')
 options=('!strip')
 makedepends=('kmod' 'inetutils' 'bc' 'libelf')
@@ -87,12 +87,15 @@ source=('git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git#b
         'linux.preset'
 
         ### BFQ-MQ ###
-        '4.12-bfq-mq-20170710.patch'
+        "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.12-bfq-mq-20170729.patch"
         "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-uuid-block-merge.patch"
+        "https://gitlab.com/tom81094/custom-patches/raw/master/bfq-mq/4.13-linux-block-for-linus.patch"
+        "0001-Check-presence-on-tree-of-every-entity-after-every-a.patch"
 	### UKSM ###
         "http://kerneldedup.org/download/uksm/0.1.2.6/uksm-0.1.2.6-for-v4.12.patch"
 	### VRQ ###
-        "https://bitbucket.org/alfredchen/linux-gc/downloads/v4.12_vrq096d.patch"
+        "https://bitbucket.org/alfredchen/linux-gc/downloads/affinity_fix.patch"
+        "https://bitbucket.org/alfredchen/linux-gc/downloads/v4.12_vrq096e.patch"
 	### MuQSS ###
         # "http://ck.kolivas.org/patches/muqss/4.0/4.11/4.11-sched-MuQSS_156.patch"
         )
@@ -109,15 +112,28 @@ prepare() {
     cd "${srcdir}/${_srcname}"
             
     ### Patch source with BFQ-MQ
+        msg "Fix naming schema in BFQ-MQ patch"
+        sed -i -e "s|PATCHLEVEL = 13|PATCHLEVEL = 12|g" \
+            -i -e "s|SUBLEVEL = 0|SUBLEVEL = 4|g" \
+            -i -e "s|EXTRAVERSION = -rc1|EXTRAVERSION =|g" \
+            -i -e "s|EXTRAVERSION = -bfq-rc1|EXTRAVERSION =|g" \
+            -i -e "s|EXTRAVERSION =-bfq-mq|EXTRAVERSION =|g" "${srcdir}/4.12-bfq-mq-20170729.patch"
         msg "Patching source with BFQ-MQ patches"
-        patch -Np1 -i "${srcdir}/4.12-bfq-mq-20170710.patch"
+        patch -Np1 -i "${srcdir}/4.12-bfq-mq-20170729.patch"
         patch -Np1 -i "${srcdir}/4.13-uuid-block-merge.patch"
+        patch -Np1 -i "${srcdir}/4.13-linux-block-for-linus.patch"
+
+    ### Patches related to BUG_ON(entity->tree && entity->tree != &st->active) in __bfq_requeue_entity();
+        if [ -n "$_use_tentative_patches" ]; then
+        msg "Apply tentative patches"
+        for p in "${srcdir}"/0001*.patch*; do patch -Np1 -i "$p"; done
+        fi
 
     ### UKSM ###
 	patch -Np1 -i "${srcdir}/uksm-0.1.2.6-for-v4.12.patch"
 
     ### VRQ ###
-	patch -Np1 -i "${srcdir}/v4.12_vrq096d.patch"
+	patch -Np1 -i "${srcdir}/v4.12_vrq096e.patch"
 
     ### MuQSS ###
 	# patch -Np1 -i "${srcdir}/4.11-sched-MuQSS_156.patch"
@@ -167,12 +183,12 @@ prepare() {
                 sed -i -e s'/CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y/# CONFIG_CPU_FREQ_GOV_SCHEDUTIL is not set/' ./.config
         fi 
         
-    ### Optionally set tickrate to 1000 
-	if [ -n "$_1k_HZ_ticks" ]; then
-		msg "Setting tick rate to 1k..."
-		sed -i -e 's/^CONFIG_HZ_300=y/# CONFIG_HZ_300 is not set/' \
-			-i -e 's/^# CONFIG_HZ_1000 is not set/CONFIG_HZ_1000=y/' \
-			-i -e 's/^CONFIG_HZ=300/CONFIG_HZ=1000/' .config
+    ### Optionally set tickrate to 100 
+	if [ -n "$_100_HZ_ticks" ]; then
+		msg "Setting tick rate to 100..."
+		sed -i -e 's/^CONFIG_HZ_1000=y/# CONFIG_HZ_1000 is not set/' \
+			-i -e 's/^# CONFIG_HZ_100 is not set/CONFIG_HZ_100=y/' \
+			-i -e 's/^CONFIG_HZ=1000/CONFIG_HZ=100/' .config
 	fi
 	
 	### Disable Deadline I/O scheduler
@@ -491,10 +507,13 @@ done
 
 sha512sums=('SKIP'
             '77d80d50d8c4323ed36fd2097ba9f6b49bb8d7cae59d32ffa76b309758a7e9f972d26fedd77046d88ce2691bb01a07909f8bdc34ba214414be3bc030ee31994d'
-            'd7ae645699675ea0c60584d647b841e3fe7ae5034ad3c92bb067c2165ee45e43fb3b14e534df96c2a47697242e939ad89f137a299ea841342bc3cbc32f1aa337'
+            '522f0f6e15f7b5e8b41f8d23ad9bf8b2857d89f927b5d5a4c4c4f56cf2805dc47d57d0e6600a137492492528b90eb6296e41f3c7cc18224618f6aad8612760b6'
             'd6faa67f3ef40052152254ae43fee031365d0b1524aa0718b659eb75afc21a3f79ea8d62d66ea311a800109bed545bc8f79e8752319cd378eef2cbd3a09aba22'
             '2dc6b0ba8f7dbf19d2446c5c5f1823587de89f4e28e9595937dd51a87755099656f2acec50e3e2546ea633ad1bfd1c722e0c2b91eef1d609103d8abdc0a7cbaf'
-            'dc5fcb4103f12f681015873f16fe6235f39889b3ac786f2c9c59a6e708da6c7b3f4982d6d80c299d77d228bb37d5f06836c0f07e77e030e2d747bb9b7a82a466'
+            '38792eed552a4c81679279ee468a60800f17533e3bfcef2362aba0deb787ffd9f2a7106249edc420ba795eb9abd8ec4c2496fdde11549ccf4f36ab1339a81321'
             '25741e37a225cebb6cd4f82a9eb63a86836d060c7f855b8169cf4d9753fe9d7c1c0eb8fea56b20e484f81a93c071e4ac7626586c1b306b8cf9aa35f5840d44c2'
+            '8368b6847d6f32b6e0c88c097823fbdbe89e63e65a915a3198ae1a4330fe0c4a4cbfeac92b3bbd08d3828ccc8ac961e5122be56f9a41ee855f5c1615f8ca5694'
+            '0f96fa9ad784709973b32eea82075ceb3e9dc2482df6441a4607612806f069254e63508b1b562279622394e4a1fbebef1b87af8401c0b1210d5d0de9954245c8'
             '1a2de50b0d82de6fd4c6763767c1bd14be10c2d268e24f8ef7662439729e899d49620ad4f2ede3b59ffbfd7ff819766d75f0b3a4f0f5c36460be7284d901072f'
-            'bfc36fa635d6b41e3173d9d0c3b0ed0459382b51049a4f6d6414332e1bd1d23d4f30de4bbf0d28a2857cf88e5bd751dbf1e1aeecf280506b9a307f44c875d53a')
+            'ac47329142166ecd6056c18851f2f81bc80a586a934d53d766444bac2866c207b81ffe93a5e890fb522c5e5fcb9d0bce343d35e62968a0ac2b4a7e12ca4f751d'
+            '94d8bf17dfc03e1b81f215a61eeee2eb0b36c9471a337d11a2ab0657beea4c96a30a6a7fc0450a3b8aef588661857a4927810294a804d2fe3cd66d6f4359beca')
